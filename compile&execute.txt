@@ -1,0 +1,2 @@
+compile gcc vigenere.c -o vigenere.exe 
+execute ./vigenere.c

@@ -81,6 +81,7 @@ bool lerCifra(char *mensagem, char *cifra, int tamanho) {
         printf("Como deseja criptografar a mensagem?\n");
         printf("1. Cifra Aleatoria\n");
         printf("2. Digitar a Cifra\n");
+        printf("3. Cifra de Cesar\n");
 
         if (!lerEntrada("", opcao, sizeof(opcao))) {
             return false;
@@ -101,6 +102,22 @@ bool lerCifra(char *mensagem, char *cifra, int tamanho) {
                     printf("Erro: O tamanho da cifra deve ser igual ao tamanho da mensagem.\n");
                 }else{
                     printf("Cifra digitada: %s\n", cifra);
+                    return true;
+                }
+                break;
+            case '3':
+                if (!lerEntrada("Digite a letra da cifra: ", cifra, tamanho)) {
+                    return false;
+                }
+                paraMaiusculas(cifra);
+                if(!verificaStringValida(cifra) || strlen(cifra) != 1) {
+                    printf("Erro: A cifra deve conter apenas uma letra.\n");
+                }else{
+                    printf("Cifra digitada: %s\n", cifra);
+                    for (int i = 0; i < strlen(mensagem); i++) {
+                        cifra[i] = cifra[0];
+                    }
+                    cifra[strlen(mensagem)] = '\0';
                     return true;
                 }
                 break;

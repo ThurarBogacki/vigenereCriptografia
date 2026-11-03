@@ -40,72 +40,94 @@ int verificaStringValida(char *str) {
         }
     }
     return 1; // String válida
-
 }
+
+bool lerEntrada(char *prompt, char *entrada, int tamanho) {
+    printf("%s", prompt);
+
+    if (fgets(entrada, tamanho, stdin) == NULL) {
+        return false;
+    }
+
+    if (strchr(entrada, '\n') == NULL) {
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF) {}
+    }
+
+    entrada[strcspn(entrada, "\n")] = '\0';
+    return true;
+}
+
+bool lerMensagem(char *mensagem, int tamanho) {
+    while (true) {
+        if (!lerEntrada("Digite a mensagem: ", mensagem, tamanho)) {
+            return false;
+        }
+
+        paraMaiusculas(mensagem);
+
+        if (verificaStringValida(mensagem)) {
+            return true;
+        }
+
+        printf("Erro: A mensagem deve conter apenas letras.\n");
+    }
+}
+
+bool lerCifra(char *mensagem, char *cifra, int tamanho) {
+    char opcao[8];
+
+    while (true) {
+        printf("Como deseja criptografar a mensagem?\n");
+        printf("1. Cifra Aleatoria\n");
+        printf("2. Digitar a Cifra\n");
+
+        if (!lerEntrada("", opcao, sizeof(opcao))) {
+            return false;
+        }
+
+        switch (opcao[0]) {
+            case '1':
+                generateRandomCipher(cifra, strlen(mensagem));
+                return true;
+            case '2':
+                if (!lerEntrada("Digite a cifra: ", cifra, tamanho)) {
+                    return false;
+                }
+                paraMaiusculas(cifra);
+                if(!verificaStringValida(cifra)) {
+                    printf("Erro: A cifra deve conter apenas letras.\n");
+                }else if(strlen(cifra) != strlen(mensagem)) {
+                    printf("Erro: O tamanho da cifra deve ser igual ao tamanho da mensagem.\n");
+                }else{
+                    printf("Cifra digitada: %s\n", cifra);
+                    return true;
+                }
+                break;
+            default:
+                printf("Opção inválida.\n");
+        }
+    }
+}
+
 int main() {
     srand(time(NULL));
-    char continuar = 's';
+    char continuar;
 
     do{
         char mensagem[256];
         char cifra[256];
         char mensagemCifrada[256];
         char mensagemDecifrada[256];
-        int chaveValida = 0;
-        printf("Digite a mensagem: ");
-        fgets(mensagem, sizeof(mensagem), stdin);
+        char opcao[8];
 
-        mensagem[strcspn(mensagem, "\n")] = '\0';
-
-        paraMaiusculas(mensagem);
-
-        if(!verificaStringValida(mensagem)) {
-            printf("Erro: A mensagem deve conter apenas letras.\n");
-            continue;
+        if (!lerMensagem(mensagem, sizeof(mensagem))) {
+            return 0;
         }
 
-        do{
-            printf("Como deseja criptografar a mensagem?\n");
-            printf("1. Cifra Aleatoria\n");
-            printf("2. Digitar a Cifra\n");
-
-            switch (getchar()) {
-                case '1':
-
-                    while (getchar() != '\n');
-
-                    printf("Cifra Aleatória selecionada.\n");
-                
-                    generateRandomCipher(cifra, strlen(mensagem));
-                    chaveValida = 1;
-                    break;
-                case '2':
-
-                    while (getchar() != '\n');
-
-                    printf("Digite a cifra: ");
-
-                    fgets(cifra, sizeof(cifra), stdin);
-                    cifra[strcspn(cifra, "\n")] = '\0';
-                    paraMaiusculas(cifra);
-                    if(!verificaStringValida(cifra)) {
-                        printf("Erro: A cifra deve conter apenas letras.\n");
-                        continue;
-                    }else if(strlen(cifra) != strlen(mensagem)) {
-                        printf("Erro: O tamanho da cifra deve ser igual ao tamanho da mensagem.\n");
-                        continue;
-                    }else{
-                        printf("Cifra digitada: %s\n", cifra);
-                        // Implementação da criptografia com a cifra digitada aqui
-                        chaveValida = 1;
-                    }
-                    break;
-                    default:
-                        while (getchar() != '\n');
-                        printf("Opção inválida.\n");
-                }
-
-        } while (!chaveValida);    
+        if (!lerCifra(mensagem, cifra, sizeof(cifra))) {
+            return 0;
+        }
 
         cifrar(mensagem, cifra, mensagemCifrada);
         decifrar(mensagemCifrada, cifra, mensagemDecifrada);
@@ -113,8 +135,9 @@ int main() {
         printf("Mensagem Cifrada: %s\n", mensagemCifrada);
         printf("Mensagem Decifrada: %s\n", mensagemDecifrada);
 
-        printf("\nDeseja criptografar outra mensagem? (S/N): ");
-        continuar = getchar();
-        while (getchar() != '\n');
+        if (!lerEntrada("\nDeseja criptografar outra mensagem? (S/N): ", opcao, sizeof(opcao))) {
+            return 0;
+        }
+        continuar = opcao[0];
     }while(continuar == 's' || continuar == 'S');
 }
